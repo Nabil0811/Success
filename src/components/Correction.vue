@@ -14,7 +14,7 @@
       <div class="question-section">
         <div class="question">{{ questions[currentQuestion]?.titre }}</div>
         <div class="answers">
-          <divè
+          <div
             v-for="(answer, index) in answers[currentQuestion]"
             :key="index"
             :class="{ correct: answer.etre_bonne_reponse }"
