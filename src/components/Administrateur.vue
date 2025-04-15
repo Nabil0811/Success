@@ -37,6 +37,13 @@
       >
         Correction
       </router-link>
+      <router-link 
+        to="/administrateur/profils" 
+        class="nav-button" 
+        :class="{ active: isActive('/administrateur/profils') }"
+      >
+        Profils
+      </router-link>
     </div>
 
     <div class="component-container">
@@ -113,39 +120,42 @@ const isActive = (path) => {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-top: 50px;
+  margin-top: 80px;
+  flex-wrap: wrap;
 }
 
 .nav-button {
   text-decoration: none;
-  font-family: 'Roboto', sans-serif; /* Police moderne */
-  font-size: 2.5rem; /* Taille impressionnante */
-  font-weight: bold; /* Texte épais */
-  color: #b5b2b2; /* Couleur blanche pour le texte */
-  text-shadow: 2px 2px 1px rgba(0, 0, 0, 1); /* Ombre subtile pour le texte */
-  letter-spacing: 2px; /* Espacement entre les lettres */
-  text-transform: uppercase; /* Majuscules */  
-  padding: 10px 20px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #b5b2b2;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+  letter-spacing: 1px;
+  text-transform: uppercase;  
+  padding: 12px 20px;
   border-radius: 5px;
-  font-size: 16px;
-  margin-top: 60px;
   text-align: center;
   cursor: pointer;
   display: inline-block;
+  transition: all 0.3s ease;
 }
 
 .nav-button:hover {
   background: linear-gradient(135deg, #6e8efb, #a777e3);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-button.active {
   background: linear-gradient(135deg, #6e8efb, #a777e3);
   color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .component-container {
-  margin-top: 20px;
+  margin-top: 30px;
   padding: 20px;
-  text-align: center;
 }
 </style>

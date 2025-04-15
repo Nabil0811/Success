@@ -37,22 +37,41 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['startEvaluation']);
-
 const totalPoints = ref(0);
 
 onMounted(async () => {
   try {
+    // Récupérer les questions liées au questionnaire via la table Contenir
     const { data: questionsData, error: questionsError } = await supabase
       .from('contenir')
-      .select('question.points')
-      .eq('id_questionnaire', props.questionnaire.id_questionnaire)
-      .join('question', 'contenir.id_question', 'question.id_question');
+      .select('id_question')
+      .eq('id_questionnaire', props.questionnaire.id_questionnaire);
 
     if (questionsError) {
       console.error('Erreur lors de la récupération des questions :', questionsError);
-    } else {
-      totalPoints.value = questionsData.reduce((acc, question) => acc + question.points, 0);
+      return;
     }
+    
+    if (!questionsData || questionsData.length === 0) {
+      console.log("Aucune question trouvée pour ce questionnaire");
+      return;
+    }
+
+    // Récupérer les points pour chaque question
+    const questionIds = questionsData.map(q => q.id_question);
+    
+    const { data: pointsData, error: pointsError } = await supabase
+      .from('question')
+      .select('points')
+      .in('id_question', questionIds);
+
+    if (pointsError) {
+      console.error('Erreur lors de la récupération des points :', pointsError);
+      return;
+    }
+
+    // Calculer le total des points
+    totalPoints.value = pointsData.reduce((acc, question) => acc + (question.points || 0), 0);
   } catch (error) {
     console.error("Erreur lors du chargement des données :", error);
   }

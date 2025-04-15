@@ -17,6 +17,8 @@ import CreationU from '../components/CreationU.vue';
 import CreationG from '../components/CreationG.vue';
 import DebutTest from '../components/DebutTest.vue';
 import Fin from '../components/Fin.vue';
+import ProfilUtilisateur from '../components/ProfilUtilisateur.vue';
+import AdminUserProfile from '../components/AdminUserProfile.vue';
 
 const routes = [
   {
@@ -28,6 +30,7 @@ const routes = [
     path: '/administrateur',
     name: 'Administrateur',
     component: Administrateur,
+    meta: { requiresAuth: true, role: 'administrateur' },
     children: [
       {
         path: 'utilisateurs',
@@ -38,21 +41,17 @@ const routes = [
         path: 'questionnaires',
         name: 'Questionnaires',
         component: Questionnaires,
-        children: [
-          {
-            path: 'creation-questionnaire',
-            name: 'CreationQ',
-            component: CreationQ,
-            children: [
-              {
-                path: 'creation-questions/:id_questionnaire',
-                name: 'CreationQu',
-                component: CreationQu,
-                props: true,
-              },
-            ],
-          },
-        ],
+      },
+      {
+        path: 'questionnaires/creation',
+        name: 'CreationQ',
+        component: CreationQ,
+      },
+      {
+        path: 'questionnaires/edit/:questionnaireId',
+        name: 'EditQuestions',
+        component: EditQuestions,
+        props: true,
       },
       {
         path: 'dashboard',
@@ -63,41 +62,50 @@ const routes = [
         path: 'correction',
         name: 'ListeCorrection',
         component: ListeCorrection,
-        children: [
-          {
-            path: 'correction-question/:idQuestionnaire/:idUtilisateur',
-            name: 'Correction',
-            component: Correction,
-            props: true,
-          },
-        ],
       },
+      {
+        path: 'correction/:idQuestionnaire/:idUtilisateur',
+        name: 'Correction',
+        component: Correction,
+        props: true,
+      },
+      {
+        path: 'profils',
+        name: 'AdminUserProfile',
+        component: AdminUserProfile,
+      }
     ],
   },
   {
     path: '/collaborateur',
     name: 'Collaborateur',
     component: Collaborateur,
+    meta: { requiresAuth: true, role: 'collaborateur' },
     children: [
+      {
+        path: 'profil',
+        name: 'ProfilUtilisateur',
+        component: ProfilUtilisateur,
+        props: (route) => ({
+          username: useAuthStore().user
+        }),
+      },
       {
         path: 'debut',
         name: 'DebutTest',
         component: DebutTest,
-        children: [
-          {
-            path: 'evaluation/:id_questionnaire',
-            name: 'Evaluation',
-            component: Evaluation,
-            props: true,
-            children: [
-              {
-                path: 'fin',
-                name: 'Fin',
-                component: Fin,
-              },
-            ],
-          },
-        ],
+        props: true,
+      },
+      {
+        path: 'evaluation/:id_questionnaire',
+        name: 'Evaluation',
+        component: Evaluation,
+        props: true,
+      },
+      {
+        path: 'fin',
+        name: 'Fin',
+        component: Fin,
       },
     ],
   },
@@ -106,6 +114,33 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// Navigation Guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+  
+  // Si la route requiert une authentification
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!authStore.isAuthenticated) {
+      // Rediriger vers la page de connexion si non authentifié
+      next({ path: '/' });
+    } else if (to.meta.role && to.meta.role !== authStore.role) {
+      // Vérifier le rôle si spécifié
+      if (authStore.role === 'administrateur') {
+        next({ path: '/administrateur' });
+      } else if (authStore.role === 'collaborateur') {
+        next({ path: '/collaborateur' });
+      } else {
+        next({ path: '/' });
+      }
+    } else {
+      next(); // Autorisé à accéder
+    }
+  } else {
+    // Route publique
+    next();
+  }
 });
 
 export default router;
